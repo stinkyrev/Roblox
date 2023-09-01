@@ -1,0 +1,832 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local colors = {
+    SchemeColor = Color3.fromRGB(77, 77, 77),
+    Background = Color3.fromRGB(43, 43, 43),
+    Header = Color3.fromRGB(33, 33, 33),
+    TextColor = Color3.fromRGB(255,255,255),
+    ElementColor = Color3.fromRGB(35, 35, 35)
+}
+local Window = Library.CreateLib(" 🦜🔫 ReBirdy Development | Anomic | v1.8", colors)
+
+local TeamList = require(game:GetService("ReplicatedStorage").Client.TeamList)
+
+for i,v in pairs(TeamList) do    
+    v.Spawns = {"Arway", "Eastdike", "Eaphis Plateau", "Pahrump", "Okby Steppe", "Depository", "Airfield", "Towing Company", "Depot"}    
+end
+
+_G.Autodrop_SR = false
+_G.Autodrop_MSMG = false
+_G.Autodrop_SO = false
+_G.Autodrop_PDW = false
+
+_G.Autodrop_HB = false
+_G.Autodrop_MK = false
+_G.Autodrop_STM = false
+
+_G.Autobuy_SR = false
+_G.Autobuy_MSMG = false
+_G.Autobuy_SO = false
+_G.Autobuy_PDW = false
+
+_G.Autobuy_HB = false
+_G.Autobuy_MK = false
+_G.Autobuy_STM = false
+
+_G.Cratespam = false
+_G.Cratespam_HB = false
+
+_G.Autobuy_AK_AMMO = false
+_G.Autobuy_SMG_AMMO = false
+_G.Autobuy_ACP_AMMO = false
+_G.Autobuy_SG_AMMO = false
+_G.Autobuy_SNIPER_AMMO = false
+_G.Autobuy_OTHER_AMMO = false
+
+_G.Playerjoin = false
+
+local Player = game.Players.LocalPlayer
+local InfStamina = false
+
+local MainTab = Window:NewTab("Main")
+local GiveawayTab = Window:NewTab("Giveaway")
+local CombatTab = Window:NewTab("Combat")
+local InformationTab = Window:NewTab("Information")
+local ReBirdyTab = Window:NewTab("ReBirdy")
+local SettingsTab = Window:NewTab("Settings")
+local FunTab = Window:NewTab("Fun")
+
+local UsefulSection = MainTab:NewSection("Useful")
+local LocalSection = MainTab:NewSection("LocalPlayer")
+local PlayerSection = MainTab:NewSection("Players")
+
+local PlrInfoSection = InformationTab:NewSection("Player Information")
+local ScriptInfoSection = InformationTab:NewSection("Script Information")
+
+local FunSection = FunTab:NewSection("Crate Management")
+
+local PreperationSection = CombatTab:NewSection("Preperation")
+
+local ReBirdySection = ReBirdyTab:NewSection("Teleports")
+
+local CashDisplay = game:GetService("Players").LocalPlayer.PlayerGui.MainUIHolder.MenuBar.CashDisplay.Text
+PlrInfoSection:NewLabel("Starting Money: ".. CashDisplay)
+ScriptInfoSection:NewLabel("Created by: Birdy & Rev")
+ScriptInfoSection:NewLabel("Last Updated: 12/17/2022")
+
+local Gunsmith = GiveawayTab:NewSection("Gunsmith")
+local CarDealer = GiveawayTab:NewSection("Car Dealer")
+local Paramedic = GiveawayTab:NewSection("Paramedic")
+local ConfigSection = SettingsTab:NewSection("Configuration")
+
+
+ReBirdySection:NewButton("Corner Store (Arway)", "Teleports car to ReBirdy games corner store", function()
+	local args = {
+		[1] = workspace.PlayerVehicles.Minivan
+	}
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").LockCar:FireServer(unpack(args))
+	wait(0.2)
+	local args = {
+		[1] = workspace.PlayerVehicles.Minivan,
+		[2] = "FrontLeft"
+	}
+
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").EnterVehicle:FireServer(unpack(args))
+	wait(0.5)
+
+    currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+	currentVehicle:SetPrimaryPartCFrame(CFrame.new(1975.503662109375, -65.42344665527344, -1393.591552734375) * CFrame.new(0,5,0))
+end)
+ReBirdySection:NewButton("Game Area", "Teleports car to Game Area (Ghosts Perch)", function()
+    currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+	currentVehicle:SetPrimaryPartCFrame(CFrame.new(30.359281539916992, -34.261329650878906, 53.709877014160156) * CFrame.new(0,5,0))
+end)
+
+ConfigSection:NewKeybind("Minimize/Open", "Toggles the UI", Enum.KeyCode.LeftAlt, function()
+	Library:ToggleUI()
+end)
+
+
+
+FunSection:NewTextBox("Purchase Crate", "Purchases the Crate entered", function(txt)
+	local args = {
+		[1] = txt,
+		[2] = "Crate",
+		[3] = nil --[[Color3]]
+	}
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").RequestDeliveries:InvokeServer()
+	local args = {
+		[1] = "PickUpDelivery",
+		[2] = txt
+	}
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").DeliveryFunction:FireServer(unpack(args))
+end)
+
+FunSection:NewToggle("Crate Spam (Lockpick)", "Automatically buys Crates and Drops them", function(toggled)
+    if toggled then
+        _G.Cratespam = true
+		while _G.Cratespam == true do
+			local args = {
+				[1] = "Lockpick",
+				[2] = "Crate",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").RequestDeliveries:InvokeServer()
+			local args = {
+				[1] = "PickUpDelivery",
+				[2] = "Lockpick"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").DeliveryFunction:FireServer(unpack(args))
+			local args = {
+				[1] = "Drop"
+			}
+
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PickCarryable:FireServer(unpack(args))
+			local args = {
+				[1] = "Drop"
+			}
+
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PickCarryable:FireServer(unpack(args))
+		end			
+    else
+        _G.Cratespam = false
+    end
+end)
+FunSection:NewToggle("Crate Spam (Health Booster)", "Automatically buys Crates and Drops them", function(toggled)
+    if toggled then
+        _G.Cratespam_HB = true
+		while _G.Cratespam_HB == true do
+			local args = {
+				[1] = "Health Booster",
+				[2] = "Crate",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").RequestDeliveries:InvokeServer()
+			local args = {
+				[1] = "PickUpDelivery",
+				[2] = "Health Booster"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").DeliveryFunction:FireServer(unpack(args))
+			local args = {
+				[1] = "Drop"
+			}
+
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PickCarryable:FireServer(unpack(args))
+			local args = {
+				[1] = "Drop"
+			}
+
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PickCarryable:FireServer(unpack(args))
+		end			
+    else
+        _G.Cratespam_HB = false
+    end
+end)
+
+
+PreperationSection:NewDropdown("Ammo Selection", "Selects the ammo for features below", {"5.56", "9mm", ".45 ACP", "5.7x28", "12 Gauge", ".50"}, function(currentOption)
+    if currentOption == "5.56" then
+		_G.Autobuy_AK_AMMO = true
+	end
+	if currentOption == "9mm" then
+		_G.Autobuy_SMG_AMMO = true
+	end
+	if currentOption == ".45 ACP" then
+		_G.Autobuy_ACP_AMMO = true
+	end
+	if currentOption == "5.7x28" then
+		_G.Autobuy_OTHER_AMMO = true
+	end
+	if currentOption == "12 Gauge" then
+		_G.Autobuy_SG_AMMO = true
+	end
+	if currentOption == ".50" then
+		_G.Autobuy_SNIPER_AMMO = true
+	end
+end)
+PreperationSection:NewToggle("Autobuy", "Autobuys the Ammo selected", function(toggled)
+    if toggled then
+		while _G.Autobuy_AK_AMMO == true do
+			local args = {
+				[1] = "5.56",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+
+		while _G.Autobuy_SMG_AMMO == true do
+			local args = {
+				[1] = "9mm",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+
+		while _G.Autobuy_ACP_AMMO == true do
+			local args = {
+				[1] = ".45 ACP",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+
+		while _G.Autobuy_OTHER_AMMO == true do
+			local args = {
+				[1] = "5.7x28",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+
+		while _G.Autobuy_SG_AMMO == true do
+			local args = {
+				[1] = "12 Gauge",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+
+		while _G.Autobuy_SNIPER_AMMO == true do
+			local args = {
+				[1] = ".50",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+    else
+        _G.Autobuy_AK_AMMO = false
+		_G.Autobuy_SMG_AMMO = false
+		_G.Autobuy_ACP_AMMO = false
+		_G.Autobuy_SG_AMMO = false
+		_G.Autobuy_SNIPER_AMMO = false
+		_G.Autobuy_OTHER_AMMO = false
+    end
+end)
+
+
+PlayerSection:NewTextBox("Heal Player", "Heals the Player entered (MUST BE IN RANGE)", function(txt)
+	function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+	game.Players.LocalPlayer.Chracter.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Medi Kit"])
+	
+	local args = {
+		[1] = "Heal",
+		[2] = game:GetService("Players"):FindFirstChild(txt).Character,
+		[3] = getNil("Medi Kit", "Tool")
+	}
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").ToolEvent:FireServer(unpack(args))
+
+end)
+PlayerSection:NewButton("Anti-Admin", "Kicks you when an Admin joins the game", function()
+    Names = {"kevini44", "Mudsslinger", "s2n_taz", "Loumec", "AspectType", "PassiGames", "AtlasType", "Disglair", "ExoticRBLX_Youtube", "Iivyez", "aka_Igor", "Simon_Dev"}
+	game:GetService("Players").PlayerAdded:connect(function(Plr)
+		wait(1/30)
+		
+		for _,v in next, Names do
+			if v:lower() == Plr.Name:lower() then
+				Plr:Kick(Plr.Name.. " has joined the game")
+			end
+		end
+	end)
+end)
+
+
+
+
+
+
+
+
+UsefulSection:NewTextBox("Teleport to Player", "Teleports to the player selected", function(txt)
+	for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+        if v.Name:match(txt) then
+			notify("")
+            Player.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,2,0)
+            workspace.Camera.CameraSubject = Player.Character.Humanoid
+        end
+    end
+end)
+UsefulSection:NewTextBox("View Inventory", "Views the entered plays inventory", function(txt)
+	Target = game.Players:FindFirstChild(txt)
+	for _, Tool in pairs(Target.Backpack:GetChildren()) do
+		notify(Target.Name.. ": " ..Tool.Name)
+    end
+end)
+
+function notify(title, message)game:GetService("Players").LocalPlayer.PlayerGui.Notify.TimePosition = 0 game:GetService("Players").LocalPlayer.PlayerGui.Notify.Playing = true if not message then require(game:GetService("ReplicatedStorage"):WaitForChild("Client").NotificationHandler):AddToStream(game.Players.LocalPlayer,title) else require(game:GetService("ReplicatedStorage"):WaitForChild("Client").NotificationHandler):AddToStream(game.Players.LocalPlayer,title..": "..message)end end
+
+UsefulSection:NewTextBox("View Player", "Views the player entered", function(txt)
+	for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+		if v.Name:match(txt) then
+			workspace.Camera.CameraSubject = v.Character.Humanoid
+		end
+	end
+end)
+UsefulSection:NewButton("Unview", "Unviews the player entered above", function()
+	workspace.Camera.CameraSubject = Player.Character.Humanoid
+end)
+
+UsefulSection:NewToggle("Join Notification", "Notifies when a Player Joins", function(toggled)
+    if toggled then
+		_G.Playerjoin = true
+		while _G.Playerjoin == true do
+			wait()
+			game.Players.PlayerAdded:Connect(function(plr)
+				notify(plr.Name.. " Has joined the game")
+			end)
+			break
+		end
+    else
+        _G.Playerjoin = false
+    end
+end)
+UsefulSection:NewButton("Fullbright (On/Off)", "Makes the game bright and not dark", function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/06iG6YkU"))()
+end)
+UsefulSection:NewDropdown("Teleport Location (CAR NEEDED)", "Teleports to the selected Place", {"Arway", "Pahrump", "Eastdike", "Eaphis Plateu", "Okby Steppe", "A Ghosts Perch"}, function(currentOption)
+    if currentOption == "A Ghosts Perch" then
+		currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+		currentVehicle:SetPrimaryPartCFrame(CFrame.new(30.359281539916992, -34.261329650878906, 53.709877014160156) * CFrame.new(0,5,0))
+	end
+	if currentOption == "Arway" then
+		currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+		currentVehicle:SetPrimaryPartCFrame(CFrame.new(1861.14111, -65.5734253, -1310.6853, 0.998740196, 0, -0.0501802117, 0, 1, 0, 0.0501802117, 0, 0.998740196) * CFrame.new(0,5,0))
+	end
+	if currentOption == "Pahrump" then
+		currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+		currentVehicle:SetPrimaryPartCFrame(CFrame.new(-73.3169708, 9.45411873, 40.8025475, 0.0519082919, 0, -0.998651743, 0, 1, 0, 0.998651743, 0, 0.0519082919) * CFrame.new(0,5,0))
+	end
+	if currentOption == "Eastdike" then
+		currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+		currentVehicle:SetPrimaryPartCFrame(CFrame.new(3044.31445, -4.52655077, -3741.91479, -0.939210117, -1.1611624e-07, -0.343343019, -1.19063124e-07, 1, -1.24975301e-08, 0.343343019, 2.91416864e-08, -0.939210117) * CFrame.new(0,5,0))
+	end
+	if currentOption == "Eaphis Plateu" then
+		currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+		currentVehicle:SetPrimaryPartCFrame(CFrame.new(1751.93347, 77.9265747, 556.575073, 0.99836874, 0, 0.0570888072, 0, 1, 0, -0.0570888072, 0, 0.99836874) * CFrame.new(0,5,0))
+	end
+	if currentOption == "Okby Steppe" then
+		currentVehicle = Player.Character.Humanoid.SeatPart.Parent
+		currentVehicle:SetPrimaryPartCFrame(CFrame.new(3894.29224, -2.04217577, -3309.31274, 0.819154441, 5.08817486e-08, 0.573573053, -8.20474284e-08, 1, 2.84667561e-08, -0.573573053, -7.03788601e-08, 0.819154441, -7.03788601e-08, 0.819154441) * CFrame.new(0,5,0))
+	end
+end)
+
+
+function noclip() if Player.Character ~= nil then for _, child in pairs(Player.Character:GetDescendants()) do if child:IsA("BasePart") and child.CanCollide == true then child.CanCollide = false end end end end
+local function disableStam(enabled)
+repeat wait() until Player.Character.HumanoidRootPart.Anchored == false       
+	for i,x in pairs(Player.Character:GetChildren()) do
+		if x:IsA("LocalScript") and x.Name ~= "KeyDrawer" and x.Name ~= "Animate" and x.Name ~= "AnimationHandler" then 
+			if enabled then
+				x.Disabled = true
+			else
+				x.Disabled = false
+			end
+		end 
+	end 
+end
+
+
+LocalSection:NewButton("Respawn", "Respawns the Character", function()
+    game:GetService("ReplicatedStorage")["_CS.Events"].PayLoad:FireServer()
+end)
+LocalSection:NewButton("Remove Job Items", "Removes your Job Items from anywhere", function()
+	game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").UnequipJobItems:FireServer()
+end)
+LocalSection:NewToggle("Backpack Gamepass", "Gets the Increased Backpack gamepass for free", function(toggled)
+	if toggled then
+		Player.PlayerScripts.OwnsBackpackPass.Value = true
+	else
+		Player.PlayerScripts.OwnsBackpackPass.Value = false
+	end
+end)
+LocalSection:NewToggle("Noclip", "Allows you to walk through objects", function(toggled)
+    if toggled then
+		Noclipping = game:GetService('RunService').Stepped:Connect(noclip)
+    else
+        Noclipping:Disconnect()
+    end
+end)
+LocalSection:NewToggle("Infinite Stamina", "Allows you to run/jump forever", function(toggled)
+    if toggled then
+		InfStamina = true
+		disableStam(true)
+    else
+        InfStamina = false
+		disableStam(false)
+    end
+end)
+game:GetService("UserInputService").InputBegan:connect(function(key)
+    if InfStamina and key.KeyCode == Enum.KeyCode.LeftShift then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 23
+    end
+end)
+game:GetService("UserInputService").InputEnded:connect(function(key)
+    if InfStamina and key.KeyCode == Enum.KeyCode.LeftShift then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 13
+    end
+end)
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    if InfStamina then    
+        wait(2)
+        disableStam(InfStamina)    
+    end
+end)
+
+
+
+
+
+
+Gunsmith:NewDropdown("Gun Selection", "Selects the gun for the features below", {"Micro SMG", "Sawed Off", "Riot PDW", "Service Rifle"}, function(currentOption)
+	if currentOption == "Micro SMG" then
+		_G.Autobuy_MSMG = true
+		_G.Autodrop_MSMG = true
+	end
+	if currentOption == "Sawed Off" then
+		_G.Autobuy_SO = true
+		_G.Autodrop_SO = true
+	end
+	if currentOption == "Riot PDW" then
+		_G.Autobuy_PDW = true
+		_G.Autodrop_PDW = true
+	end
+	if currentOption == "Service Rifle" then
+		_G.Autobuy_SR = true
+		_G.Autodrop_SR = true
+	end
+end)
+
+Gunsmith:NewToggle("Autobuy", "Automatically buys the selected Item", function(toggled)
+    if toggled then
+        while _G.Autobuy_MSMG == true do
+			local args = {
+				[1] = "Micro SMG",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+		
+		while _G.Autobuy_SO == true do
+			local args = {
+				[1] = "Sawed Off",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+		
+		while _G.Autobuy_PDW == true do
+			local args = {
+				[1] = "Riot PDW",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+		
+		while _G.Autobuy_SR == true do
+			local args = {
+				[1] = "Service Rifle",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+    else
+        _G.Autobuy_MSMG = false
+        _G.Autobuy_SO = false
+        _G.Autobuy_PDW = false
+        _G.Autobuy_SR = false
+    end
+end)
+
+Gunsmith:NewToggle("Autodrop", "Automatically drops the selected Item", function(toggled)
+    if toggled then
+    	while _G.Autodrop_MSMG == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Micro SMG"])
+
+			wait()
+			local args = {
+				[1] = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Micro SMG"),
+				[2] = Color3.fromRGB(49, 114, 255),
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PaintTool:FireServer(unpack(args))
+			
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PaintTool:FireServer(unpack(args))
+			local args = {
+				[1] = getNil("Micro SMG", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+		
+		while _G.Autodrop_SO == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Sawed Off"])
+
+			wait()
+			local args = {
+				[1] = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Sawed Off"),
+				[2] = Color3.fromRGB(49, 114, 255),
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PaintTool:FireServer(unpack(args))
+
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			local args = {
+				[1] = getNil("Sawed Off", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+		
+		while _G.Autodrop_PDW == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Riot PDW"])
+
+			wait()
+			local args = {
+				[1] = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Riot PDW"),
+				[2] = Color3.fromRGB(49, 114, 255),
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PaintTool:FireServer(unpack(args))
+
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			local args = {
+				[1] = getNil("Riot PDW", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+		
+		while _G.Autodrop_SR == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Service Rifle"])
+
+			wait()
+			local args = {
+				[1] = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Service Rifle"),
+				[2] = Color3.fromRGB(49, 114, 255),
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PaintTool:FireServer(unpack(args))
+
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			local args = {
+				[1] = getNil("Service Rifle", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+    else
+        _G.Autodrop_MSMG = false
+        _G.Autodrop_SO = false
+        _G.Autodrop_PDW = false
+        _G.Autodrop_SR = false
+    end
+end)
+
+
+_G.Autobuy_RDSTR = false
+_G.Autobuy_CVTB = false
+_G.Autobuy_LR = false
+_G.Autobuy_SC = false
+
+
+_G.Autodrop_SC = false
+_G.Autodrop_CVTB = false
+_G.Autodrop_LR = false
+_G.Autodrop_SC = false
+
+CarDealer:NewDropdown("Car Selection", "Selects the car for the features below", {"Sports Car", "Convertible", "Lowrider"}, function(currentOption)
+	if currentOption == "Sports Car" then
+		_G.Autobuy_SC = true
+		_G.Autodrop_SC = true
+	end
+	if currentOption == "Convertible" then
+		_G.Autobuy_CVTB = true
+		_G.Autodrop_CVTB = true
+	end
+	if currentOption == "Lowrider" then
+		_G.Autobuy_LR = true
+		_G.Autodrop_LR = true
+	end
+end)
+CarDealer:NewToggle("Autobuy", "Automatically buys the item selected", function(toggled)
+	if toggled then
+		while _G.Autobuy_SC == true do
+			local args = {
+				[1] = "Sports Car",
+				[2] = "Single",
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+		
+		while _G.Autobuy_CVTB == true do
+			local args = {
+				[1] = "Convertible",
+				[2] = "Single",
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+
+		while _G.Autobuy_LR == true do
+			local args = {
+				[1] = "Lowrider",
+				[2] = "Single",
+				[3] = Color3.fromRGB(30, 53, 255)
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+	else
+		_G.Autobuy_SC = false
+		_G.Autobuy_CVTB = false
+		_G.Autobuy_LR = false
+	end
+end)
+CarDealer:NewToggle("Autodrop", "Automatically buys the item selected", function(toggled)
+	if toggled then
+		while _G.Autodrop_SC == true do
+			game.Players.LocalPlayer.Character.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Sports Car"])
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			
+			local args = {
+				[1] = getNil("Sports Car", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+		
+		while _G.Autodrop_CVTB == true do
+			game.Players.LocalPlayer.Character.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Convertible"])
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+
+			local args = {
+				[1] = getNil("Convertible", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+
+		while _G.Autodrop_LR == true do
+			game.Players.LocalPlayer.Character.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Lowrider"])
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+
+			local args = {
+				[1] = getNil("Lowrider", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+	else
+		_G.Autodrop_SC = false
+		_G.Autodrop_CVTB = false
+		_G.Autodrop_LR = false
+	end
+end)
+
+
+
+Paramedic:NewDropdown("Heals Selection", "Selects the item for the features below", {"Health Booster", "Medkit", "Stamina Booster"}, function(currentOption)
+	if currentOption == "Health Booster" then
+		_G.Autobuy_HB = true
+		_G.Autodrop_HB = true
+	end
+	if currentOption == "Medkit" then
+		_G.Autobuy_MK = true
+		_G.Autodrop_MK = true
+	end
+	if currentOption == "Stamina Booster" then
+		_G.Autobuy_STM = true
+		_G.Autodrop_STM = true
+	end
+end)
+
+Paramedic:NewToggle("Autobuy", "Automatically buys Item selected above", function(toggled)
+	if toggled then
+		while _G.Autobuy_HB == true do
+			local args = {
+				[1] = "Health Booster",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+		
+		while _G.Autobuy_MK == true do
+			local args = {
+				[1] = "Medi Kit",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+		
+		while _G.Autobuy_STM == true do
+			local args = {
+				[1] = "Stamina Booster",
+				[2] = "Single",
+				[3] = nil --[[Color3]]
+			}
+
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(unpack(args))
+			wait()
+		end
+	else
+		_G.Autobuy_HB = false
+		_G.Autobuy_MK = false
+		_G.Autobuy_STM = false
+	end
+end)
+
+Paramedic:NewToggle("Autodrop", "Automatically drops Item selected above", function(toggled)
+	if toggled then
+		while _G.Autodrop_HB == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Health Booster"])
+
+			wait()
+
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			local args = {
+				[1] = getNil("Health Booster", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+		
+		while _G.Autodrop_MK == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Medi Kit"])
+
+			wait()
+
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			local args = {
+				[1] = getNil("Medi Kit", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+		
+		while _G.Autodrop_STM == true do
+			local humanoid = game.Players.LocalPlayer.Character.Humanoid
+			humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack["Stamina Booster"])
+
+			wait()
+
+			function getNil(name,class) for _,v in pairs(getnilinstances())do if v.ClassName==class and v.Name==name then return v;end end end
+			local args = {
+				[1] = getNil("Stamina Booster", "Tool"),
+				[2] = "Drop"
+			}
+			game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer(unpack(args))
+			wait(0.2)
+		end
+	else
+		_G.Autodrop_HB = false
+		_G.Autodrop_MK = false
+		_G.Autodrop_STM = false
+	end
+end)
+
+notify("ReBirdy -> Successfully loaded!")
